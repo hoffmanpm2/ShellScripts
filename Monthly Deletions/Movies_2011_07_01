@@ -1,0 +1,29 @@
+#!/bin/bash
+rm /home/philip/Media/Video/Movies/Family/Freaky\ Friday\ \(1976\).m4v
+rm /home/philip/Media/Video/Movies/Sci\ Fi/I\ Am\ Number\ Four.m4v
+rm /home/philip/Media/Video/Movies/Romance/Love\ Comes\ Softly.m4v
+rm /home/philip/Media/Video/Movies/Romantic\ Comedy/My\ Life\ in\ Ruins\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Romantic\ Comedy/No\ Strings\ Attached\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Drama/Possession\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Romance/Possession.m4v
+rm /home/philip/Media/Video/Movies/Drama/Raising\ Helen.m4v
+rm /home/philip/Media/Video/Movies/Romantic\ Comedy/Sydney\ White.m4v
+rm /home/philip/Media/Video/Movies/Crime/The\ Bone\ Collector.m4v
+rm /home/philip/Media/Video/Movies/Comedy/The\ Dilemma\ \(HD,+\).mp4
+rm /home/philip/Media/Video/Movies/Action/Unstoppable\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Family/Wild\ Child.m4v
+rm -rf /home/philip/Media/Video/Movies/Romance
+
+rm /home/philip/Media/Posters/Freaky\ Friday\ \(1976\).m4v.jpg
+rm /home/philip/Media/Posters/I\ Am\ Number\ Four.m4v.jpg
+rm /home/philip/Media/Posters/Love\ Comes\ Softly.m4v.jpg
+rm /home/philip/Media/Posters/My\ Life\ in\ Ruins\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/No\ Strings\ Attached\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Possession\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Possession.m4v.jpg
+rm /home/philip/Media/Posters/Raising\ Helen.m4v.jpg
+rm /home/philip/Media/Posters/Sydney\ White.m4v.jpg
+rm /home/philip/Media/Posters/The\ Bone\ Collector.m4v.jpg
+rm /home/philip/Media/Posters/The\ Dilemma\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Unstoppable\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Wild\ Child.m4v.jpg

@@ -1,0 +1,39 @@
+#!/bin/bash
+#
+#  Goal is to create a script that a user could run adding to serch the movie directories for
+#  a movie title to see if it exists before they buy it.
+#
+#  movie turner
+#
+LOG_DIR=/var/log
+
+PARAM1=$1
+PARAM2=$2
+PARAM3=$3
+# Things we need to know:
+#     MovieName Piece
+#
+#
+# Script/Program Flow
+#
+#	grab parameters
+#	if we have a parameter
+#		delete playlist if it exists
+#		create new one (touch)
+#	end if
+#
+# Let's grab the current directory first
+CURRENT_DIR=$PWD
+
+echo $PARAM1
+echo $CURRENT_DIR
+
+if [ -z $PARAM1 ]
+then
+	echo "No movie name provided."
+else
+ 	find /home/mike/Media/Video/Movies -iname "*$PARAM1*.*" 
+	find /home/philip/Media/Video/Movies -iname "*$PARAM1*.*" 
+ 	find /home/katie/Media/Video/Movies -iname "*$PARAM1*.*" 
+fi
+exit

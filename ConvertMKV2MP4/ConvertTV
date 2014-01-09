@@ -1,0 +1,19 @@
+#!/bin/bash
+
+INPUT=$1
+INPUTFILE=$(basename "${INPUT}")
+OUTPUTFILE=${INPUTFILE%.*}.mp4
+SEASON=$(dirname "${INPUT}")
+SHOW=$(basename "$(dirname "${SEASON}")")
+SEASON=$(basename "${SEASON}")
+OUTPUTPATH="/mnt/ladon/Archive/Television/${SHOW}/${SEASON}"
+OUTPUT=$OUTPUTPATH/$OUTPUTFILE
+
+if [ ! -d "${OUTPUTPATH}" ]; then
+   mkdir -p "${OUTPUTPATH}"
+fi
+
+if [ ! -f "${OUTPUT}" ]; then
+   STATIC_FFMPEG=/home/philip/Projects/BASH/ConvertMKV2MP4/ffmpeg
+   $STATIC_FFMPEG -i "${INPUT}" -vcodec copy -acodec copy -acodec copy -map 0:0 -map 0:2 -map 0:3 -f mp4 "${OUTPUT}"
+fi

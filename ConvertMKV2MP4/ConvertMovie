@@ -1,0 +1,17 @@
+#!/bin/bash
+
+INPUT=$1
+INPUTFILE=$(basename "${INPUT}")
+OUTPUTFILE=${INPUTFILE%.*}.mp4
+OUTPUTPATH=/home/philip/Videos
+OUTPUT=$OUTPUTPATH/$OUTPUTFILE
+
+echo ${OUTPUT}
+if [ ! -d "${OUTPUTPATH}" ]; then
+   mkdir -p "${OUTPUTPATH}"
+fi
+
+if [ ! -f "${OUTPUT}" ]; then
+   STATIC_FFMPEG=/home/philip/Projects/BASH/ConvertMKV2MP4/ffmpeg
+   $STATIC_FFMPEG -i "${INPUT}" -vcodec copy -acodec copy -acodec copy -map 0:0 -map 0:2 -map 0:3 -f mp4 "${OUTPUT}"
+fi

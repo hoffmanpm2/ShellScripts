@@ -1,0 +1,153 @@
+#!/bin/bash
+# zpool-restore [-n] pool name root
+#	ex. zpool-restore -s 05APR13 -s 06APR13 07APR13 /mnt/esata/tank
+
+# Description: Parses the output of the zfs get command to
+#	determine if a filesystem is mounted. It doesn't make
+#	sense to back up a filesystem that isn't mounted.
+# Argument: Name of filesystem
+is_mounted() {
+	local FS=$(zfs get -H mounted "${@}")
+	local FS_REGEX="^${@}\s+mounted\s+yes\s+-"
+	if [[ $FS =~ $FS_REGEX ]]; then
+		return 0
+	fi
+	return 1
+}
+
+# Description: Parses the output of the zfs list command to
+#	retrieve the filesystems for all ZFS pools. Each
+#	filesystem found is added to the FS_ARRAY variable.
+get_filesystems() {
+	if [ ! -z "${POOL}" ]; then
+		local POOL_REGEX="^${POOL}.*"
+		while read FS;
+		do
+			if [[ $FS =~ $POOL_REGEX ]]; then
+				if is_mounted $FS
+				then
+					FS_ARRAY=(${FS_ARRAY[@]} $FS)
+				fi
+			fi
+		done < <(zfs list -H -o name)
+	fi
+}
+
+get_snapshots() {
+	local FS_INDEX=1
+	for FS in ${FS_ARRAY[@]}
+	do
+		# Is this a full snapshot?
+		if [ -f "${ROOT}/${FS}/${SNAP}" ]; then
+			RESTORE_STACK=("${ROOT}/${FS}/${SNAP}" ${RESTORE_STACK[@]})
+		else
+			local NEXT_SNAP="${SNAP}"
+			while [ ! -z "${NEXT_SNAP}" ]
+			do
+				if [ -d "${ROOT}/${FS}" ]; then
+					# Find the next snapshot to restore
+					local FOUND_SNAP=$(find "${ROOT}/${FS}/" -maxdepth 1 -iname "*${NEXT_SNAP}")
+					if [ ! -z "${FOUND_SNAP}" ]; then
+						RESTORE_STACK=("${FOUND_SNAP}" ${RESTORE_STACK[@]})
+
+						# If this is another incremental snapshot
+						# then update NEXT_SNAP with the next name.
+						# Otherwise unset the variable so the loop
+						# knows to quit.
+						local INCREMENTAL_REGEX="${ROOT}/${FS}/([0-9]{2}[A-Z]{3}[0-9]{2})-${NEXT_SNAP}"
+						if [[ "${FOUND_SNAP}" =~ $INCREMENTAL_REGEX ]]; then
+							NEXT_SNAP=${BASH_REMATCH[1]}
+						else
+							unset NEXT_SNAP
+						fi
+
+					# If find was unable to locate a snapshot then
+					# it's missing and we should ignore this
+					# filesystem.
+					else
+						unset FS_ARRAY[$FS_INDEX]
+						unset NEXT_SNAP
+					fi
+
+				# If there isn't a directory for the filesystem
+				# then no snapshots exist and the script should
+				# move on.
+				else
+					unset FS_ARRAY[$FS_INDEX]
+					unset NEXT_SNAP
+				fi
+			done
+		fi
+
+		FS_INDEX=$((FS_INDEX+1))		
+	done
+}
+
+restore_snapshots() {
+	# Unmount filesystems that will be modified
+	for FS in ${FS_ARRAY[@]}
+	do
+		echo "zfs unmount ${FS}"
+	done
+
+	# Restore snapshots for each filesystem
+	for FILE in ${RESTORE_STACK[@]}
+	do
+		FILESYSTEM=${FILE#$ROOT}
+		FILESYSTEM=${FILESYSTEM#/}
+		FILESYSTEM=${FILESYSTEM%/*}
+		echo "zfs recv ${FILESYSTEM} < ${FILE}"
+	done
+
+	# Remount everything
+	echo "zfs mount -a"
+}
+
+# Main
+# Get Option Arguments
+OPTIND=1
+while getopts ":n" opt
+do
+	case $opt in
+		n)
+			DRYRUN="TRUE"
+			;;
+		*)
+			echo "WARNING: Invalid option (${opt}) supplied."
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+# Get Non-Option Arguments
+CMDLINE_REGEX='^(.+)\s+(.+)\s+(.+)$'
+if [[ $@ =~ $CMDLINE_REGEX ]]; then
+	POOL=${BASH_REMATCH[1]}
+	SNAP=${BASH_REMATCH[2]}
+	ROOT=${BASH_REMATCH[3]}
+	if [ -z "${ROOT##/}" ]; then
+		ROOT="${ROOT%/}"
+	fi
+	
+	# Get Filesystems for $POOL
+	FS_ARRAY=()
+	get_filesystems
+
+	# Get Snapshots Required to Restore $POOL
+	RESTORE_STACK=()
+	get_snapshots
+
+	if [ ! -z "${DRYRUN}" ]; then
+		echo "Snapshot files to be restored:"
+		for FILE in ${RESTORE_STACK[@]}
+		do
+			echo "${FILE}"
+		done
+	else
+		# Restore the Snapshots for $POOL
+		restore_snapshots
+	fi
+else
+	echo "zpool-restore [-n] <pool> <snapshot> <root>"
+fi
+

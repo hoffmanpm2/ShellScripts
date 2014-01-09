@@ -1,0 +1,17 @@
+#!/bin/bash
+
+INPUT=$1
+INPUTFILE=$(basename "${INPUT}")
+INPUTPATH=$(dirname "${INPUT}")
+OUTPUTPATH=${INPUTPATH%/Video*}
+OUTPUTPATH="${OUTPUTPATH}"/Posters
+POSTERFILE="${INPUTPATH}"/${INPUTFILE%.*}-poster.jpg
+OUTPUT="${OUTPUTPATH}"/"${INPUTFILE}".jpg
+
+if [ ! -d "${OUTPUTPATH}" ]; then
+   mkdir -p "${OUTPUTPATH}"
+fi
+
+if [ -f "${POSTERFILE}" ]; then
+   mv "${POSTERFILE}" "${OUTPUT}"
+fi

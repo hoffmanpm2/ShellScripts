@@ -1,0 +1,50 @@
+#!/bin/bash
+rm /home/philip/Media/Video/Movies/Comedy/The\ Informant\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Comedy/The\ Lucky\ Ones.m4v
+rm /home/philip/Media/Video/Movies/Comedy/Winter\ Passing.m4v
+rm /home/philip/Media/Video/Movies/Crime/The\ Life\ of\ David\ Gale.m4v
+rm /home/philip/Media/Video/Movies/Drama/127\ Hours\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Drama/Hereafter\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Drama/Lost\ In\ Austen.m4v
+rm /home/philip/Media/Video/Movies/Drama/Shutter\ Island\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Drama/The\ Ninth\ Gate\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Drama/The\ Scarlet\ Letter.m4v
+rm /home/philip/Media/Video/Movies/Drama/The\ Vicious\ Kind.m4v
+rm /home/philip/Media/Video/Movies/Family/Summer\ Magic.m4v
+rm /home/philip/Media/Video/Movies/Family/The\ Moon-Spinners.m4v
+rm /home/philip/Media/Video/Movies/Family/The\ Secret\ of\ Kells\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Horror/Shutter\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Horror/The\ Exorcist.m4v
+rm /home/philip/Media/Video/Movies/Horror/The\ Shining\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Mystery/In\ the\ Cut.m4v
+rm -rf /home/philip/Media/Video/Movies/Performances
+rm /home/philip/Media/Video/Movies/Romantic\ Comedy/How\ Do\ You\ Know\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Romantic\ Comedy/The\ Answer\ Man\ \(HD\).mp4
+rm /home/philip/Media/Video/Movies/Thriller/Deceived.m4v
+rm /home/philip/Media/Video/Movies/Thriller/Shattered\ Lives.m4v
+rm /home/philip/Media/Video/Movies/Thriller/Stir\ of\ Echoes\ \(HD\).mp4
+
+rm /home/philip/Media/Posters/The\ Informant\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/The\ Lucky\ Ones.m4v.jpg
+rm /home/philip/Media/Posters/Winter\ Passing.m4v.jpg
+rm /home/philip/Media/Posters/The\ Life\ of\ David\ Gale.m4v.jpg
+rm /home/philip/Media/Posters/127\ Hours\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Hereafter\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Lost\ In\ Austen.m4v.jpg
+rm /home/philip/Media/Posters/Shutter\ Island\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/The\ Ninth\ Gate\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/The\ Scarlet\ Letter.m4v.jpg
+rm /home/philip/Media/Posters/The\ Vicious\ Kind.m4v.jpg
+rm /home/philip/Media/Posters/Summer\ Magic.m4v.jpg
+rm /home/philip/Media/Posters/The\ Moon-Spinners.m4v.jpg
+rm /home/philip/Media/Posters/The\ Secret\ of\ Kells\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Shutter\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/The\ Exorcist.m4v.jpg
+rm /home/philip/Media/Posters/The\ Shining\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/In\ the\ Cut.m4v.jpg
+rm /home/philip/Media/Posters/Riverdance\ Live\ From\ Geneva.m4v.jpg
+rm /home/philip/Media/Posters/How\ Do\ You\ Know\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/The\ Answer\ Man\ \(HD\).mp4.jpg
+rm /home/philip/Media/Posters/Deceived.m4v.jpg
+rm /home/philip/Media/Posters/Shattered\ Lives.m4v.jpg
+rm /home/philip/Media/Posters/Stir\ of\ Echoes\ \(HD\).mp4.jpg

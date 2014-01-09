@@ -1,0 +1,87 @@
+sudo apt-get update
+sudo apt-get dist-upgrade
+sudo apt-get install dialog software-properties-common
+sudo nano /etc/environment
+sudo apt-get install nvidia-current
+apt-cache search vdpau
+sudo nvidia-xconfig
+sudo apt-get install xinit
+sudo nvidia-xconfig
+X -config /etc/X11/XF86Config
+X -config XF86Config
+lsmod
+sudo reboot
+modprobe | less
+lsmod | less
+X -config XF86Config
+sudo apt-get install linux-headers-`uname -r`
+sudo lsmod | grep nvidia
+sudo modprobe nvidia_current
+sudo nano /etc/X11/XF86Config
+glxinfo
+sudo apt-get install mesa-utils
+glxinfo | grep -i "Direct Rendering"
+X -config XF86Config
+X -configure
+sudo X -configure
+X -config /home/plex/xorg.conf.new
+sudo cp xorg.conf.new /etc/X11/
+X -config xorg.conf.new
+sudo cp /etc/X11/XF86Config /etc/X11/xorg.conf
+startx
+glxinfo | grep -i "Direct Rendering"
+exit
+sudo nano /etc/X11/xorg.conf
+ls -l /dev
+ls -l /dev | less
+ls -l /dev/input
+lshw
+sudo lshw | less
+lspci -v
+ls -l /dev/sys*
+sudo nano /etc/X11/xorg.conf
+startx
+sudo nano /etc/default/grub
+sudo nano /etc/grub.d/00_header
+sudo update-grub2
+sudo reboo
+sudo reboot
+sudo nano /etc/default/grub
+sudo nano /etc/grub.d/00_header
+sudo update-grub2
+sudo reboot
+sudo nano /etc/default/grub
+sudo nano /etc/grub.d/00_header
+sudo update-grub2
+sudo reboot
+glxinfo | less
+exit
+startx
+wget http://www.dropbox.com/s/3uogufl39gvu56j/plexhometheater.sh
+chmod +x plexhometheater.sh
+./plexhometheater.sh
+plexhometheater.sh
+echo $XBMC_HOME
+export XBMC_HOME=/opt/plexhometheater/share/XBMC
+/opt/plexhometheater/bin/plexhometheater --standalone -- :0
+xinit /opt/plexhometheater/bin/plexhometheater --standalone -- :0
+sudo rebot
+sudo reboot
+vdpauinfo
+vdpauinfo | less
+exit
+sudo apt-get remove nvidia-current
+sudo apt-get purge nvidia-current
+dpkg -l | grep nvidia
+sudo apt-get remove nvidia-304
+apt-cache search nvidia | less
+sudo apt-get install nvidia-313-updates
+sudo reboot
+sudo service plexhometheater start
+sudo apt-get install lirc
+sudo reboot
+sudo service plexhometheater start
+sudo update-rc.d plexhometheater enable
+sudo reboot
+exit
+

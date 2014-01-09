@@ -1,0 +1,275 @@
+#!/bin/bash
+# zpool-backup: Backup solution for ZFS Storage Pools
+# Command: zpool-backup [-s old_snapshot] [-f filters_file] -n <pool> <snapshot_name> <destination>
+#	where -n is for dry-run.
+#	ex. # zpool-backup -s 05APR13 -f /root/filters.lst tank 06APR13 /mnt/esata
+
+
+# Description: Parses the output of the zfs get command to
+#	determine if a filesystem is mounted. It doesn't make
+#	sense to back up a filesystem that isn't mounted.
+# Argument: Name of filesystem
+is_mounted() {
+	local FS=$(zfs get -H mounted "${@}")
+	FS_REGEX="^${@}\s+mounted\s+yes\s+-"
+	if [[ $FS =~ $FS_REGEX ]]; then
+		return 0
+	fi
+	return 1
+}
+
+# Description: Parses the output of the zfs list command to
+#	retrieve the filesystems for each pool provided. Each
+#	filesystem found is added to the FS_ARRAY variable.
+# Arguments: Name(s) of pool(s)
+# TODO: Check for issues regarding filesystems that contain
+#	spaces. I don't think the regex will account for them.
+get_filesystems() {
+	if [ ! -z "${POOL}" ]; then
+		local POOL_REGEX="^${POOL}.*"
+		while read FS;
+		do
+			if [[ $FS =~ $POOL_REGEX ]]; then
+				if is_mounted $FS
+				then
+					FS_ARRAY=(${FS_ARRAY[@]} $FS)
+				fi
+			fi
+		done < <(zfs list -H -o name)
+	fi
+}
+
+# Description: Removes the supplied filesystem from the
+#	FS_ARRAY array.
+# Arguments: Name of filesystem
+exclude_filesystem() {
+	if [ $# -eq 1 ]; then
+		local FS=
+		for FS in ${!FS_ARRAY[@]}
+		do
+			if [ "${FS_ARRAY[FS]}" = "${1}" ]; then
+				unset FS_ARRAY[FS]
+			fi
+		done
+	fi
+}
+
+# Description: Adds the supplied filesystem to the
+#	FS_ARRAY array.
+# Arguments: Name of filesystem
+include_filesystem() {
+	if [ $# -eq 1]; then
+		FS_ARRAY=(${FS_ARRAY[@]} $FILESYSTEM)
+	fi
+}
+
+# Description: Accepts a rsync-style filter file w/o
+#	support for wildcards. It will NOT handle a mixture
+#	of exclude & include statements. Any filesystem
+#	included (+) will be backed up to the external
+#	device. Any	filesystem excluded (-) will not be
+#	backed up to the external device. If the file
+#	provided is empty	then all filesystems will be
+#	backed up.
+#
+#	NOTE: Even if a filesystem isn't explicitly
+#	excluded, it will not be backed up if a single
+#	include statement	exists.
+#
+# Arguments: File containing filters
+apply_filters() {
+	if [ $# -eq 1 ]; then
+		if [ -f "${1}" ]; then
+			FILTER_EXCLUDE=()
+			FILTER_EXCLUDE_COUNT=${#FILTER_EXCLUDE[@]}
+			FILTER_INCLUDE=()
+			FILTER_INCLUDE_COUNT=${#FILTER_INCLUDE[@]}
+
+			EXCLUDE_REGEX='^- (.+)'
+			INCLUDE_REGEX='^+ (.+)'
+			while read FILTER
+			do
+				if [[ $FILTER =~ $EXCLUDE_REGEX ]]; then
+					FILTER_EXCLUDE[$FILTER_EXCLUDE_COUNT]=${BASH_REMATCH[1]}
+					FILTER_EXCLUDE_COUNT=$((FILTER_EXCLUDE_COUNT+1))
+				elif [[ $FILTER =~ $INCLUDE_REGEX ]]; then
+					FILTER_INCLUDE[$FILTER_INCLUDE_COUNT]=${BASH_REMATCH[1]}
+					FILTER_INCLUDE_COUNT=$((FILTER_INCLUDE_COUNT+1))
+				else
+					echo "WARNING: Encountered invalid format while parsing file."
+				fi
+			done < <(cat "${1}")
+
+			if [ ${#FILTER_EXCLUDE[@]} -gt 0 ]; then
+				for FILESYSTEM in ${FILTER_EXCLUDE[@]}
+				do
+					exclude_filesystem $FILESYSTEM
+				done
+			elif [ ${#FILTER_INCLUDE[@]} -gt 0 ]; then
+				FS_ARRAY=()
+				for FILESYSTEM in ${FILTER_INCLUDE[@]}
+				do
+					include_filesystem $FILESYSTEM
+				done
+			fi
+		else
+			echo "WARNING: File does not exist (${1}). Including all filesystems in the pool."
+		fi
+	fi
+}
+
+# Description: Determines whether the supplied filesystem
+#	exists. If it does then there is no reason to create a
+#	new one.
+# Arguments: Name of filesystem, Name of snapshot
+find_snapshot() {
+	if [ $# -eq 2 ]; then
+		local SNAP=
+		SNAP_FILTER="^(${1}@${2})"
+		while read SNAP
+		do
+			if [[ $SNAP =~ $SNAP_FILTER ]]; then
+				return 0
+			fi
+		done < <(zfs list -H -t snapshot -o name)
+	fi
+	return 1
+}
+
+# Description: Builds the command to take a snapshot of
+#	a filesystem. This command only creates a snapshot for
+#	a single filesystem and will need to be called
+#	multiple times for a pool.
+# Arguments: Filesystem, Snapshot Name
+create_snapshot() {
+	SNAP_FS=$1
+	SNAP_NAME=$2
+	if find_snapshot "${SNAP_FS}" "${SNAP_NAME}"
+	then
+		return 0
+	else
+		echo "Creating snapshot (${SNAP_FS}@${SNAP_NAME})..."
+		zfs snapshot "${SNAP_FS}@${SNAP_NAME}"
+	fi
+	return
+}
+
+# Description: Sends a full or incremental snapshot of
+#	a filesystem to an external device or SSH connection.
+# Arguments: Filesystem, Old Snapshot (optional),
+#	New Snapshot, Destination
+# TODO: Rename & create new send function for SSH
+#	transfers. I want to automatically name output using
+#	the snapshot name.
+send_snapshot() {
+	SEND_FS=$1
+	if [ $# -ge 4 ]; then
+		SEND_SNAP1=$2
+		SEND_SNAP2=$3
+		SEND_DEST=$4
+		if [ -d "${SEND_DEST}" ]; then
+			if [ ! -f "${SEND_DEST}/${SEND_FS}@${SEND_SNAP1}-${SEND_SNAP2}" ]; then
+				echo "Transferring incremental snapshot (${SEND_SNAP1} -> ${SEND_SNAP2}) of filesystem (${SEND_FS}) to device (${SEND_DEST})..."
+				if [ ! -d "${SEND_DEST}/${SEND_FS}" ]; then
+					mkdir -p "${SEND_DEST}/${SEND_FS}"
+				fi
+				zfs send -i "${SEND_SNAP1}" "${SEND_FS}@${SEND_SNAP2}" > "${SEND_DEST}/${SEND_FS}/${SEND_SNAP1}-${SEND_SNAP2}"
+			else
+				echo "File (${SEND_DEST}/${SEND_FS}@${SEND_SNAP1}-${SEND_SNAP2}) already exists."
+				return 1
+			fi
+		else
+			echo "Destination directory (${SEND_DEST}) does not exist."
+			return 1
+		fi
+	else
+		SEND_SNAP2=$2
+		SEND_DEST=$3
+		if [ -d "${SEND_DEST}" ]; then
+			if [ ! -f "${SEND_DEST}/${SEND_FS}@${SEND_SNAP2}" ]; then
+				echo "Transferring snapshot (${SEND_SNAP2}) of filesystem (${SEND_FS}) to device (${SEND_DEST})..."
+				if [ ! -d "${SEND_DEST}/${SEND_FS}" ]; then
+					mkdir -p "${SEND_DEST}/${SEND_FS}"
+				fi
+				zfs send "${SEND_FS}@${SEND_SNAP2}" > "${SEND_DEST}/${SEND_FS}/${SEND_SNAP2}"
+			else
+				echo "File (${SEND_DEST}/${SEND_FS}@${SEND_SNAP2}) already exists."
+				return 1
+			fi
+		else
+			echo "Destination directory (${SEND_DEST}) does not exist."
+			return 1
+		fi
+	fi
+	return
+}
+
+# Main
+#Get the date
+DATE=$(date +%d%b%y)
+DATE="${DATE^^}"
+
+# Get Option & Non-Option Arguments
+OPTIND=1
+while getopts ":s:f:n" opt
+do
+	case $opt in
+		# Source snapshot for incremental backups
+		s)
+			SNAP=$OPTARG
+			;;
+		# Rsync-esque filter file
+		f)
+			FILTERS=$OPTARG
+			;;
+		n)
+			DRYRUN="TRUE"
+			;;
+	esac
+done
+shift $((OPTIND-1))
+
+CMDLINE_REGEX='^(.+) (.+) (.+)'
+if [[ $@ =~ $CMDLINE_REGEX ]]; then
+	POOL=${BASH_REMATCH[1]}
+	SNAP2=${BASH_REMATCH[2]}
+	DEST=${BASH_REMATCH[3]}
+	if [ -z "${DEST##/}" ]; then
+		DEST="${DEST%/}"
+	fi
+
+	FS_ARRAY=()
+	get_filesystems
+
+	if [ ! -z "${FILTERS}" ]; then
+		apply_filters "${FILTERS}"
+	fi
+
+	if [ ! -z "${DRYRUN}" ]; then
+		echo Snapshots will be created for the following filesystems:
+		for FILESYSTEM in ${FS_ARRAY[@]}
+		do
+			echo $FILESYSTEM
+		done
+	else
+		for FILESYSTEM in ${FS_ARRAY[@]}
+		do
+			if create_snapshot "${FILESYSTEM}" "${SNAP2}"
+			then
+				if [ ! -z "${SNAP}" ]; then
+					if ! send_snapshot "${FILESYSTEM}" "${SNAP}" "${SNAP2}" "${DEST}"
+					then
+						echo "ERROR: Failed to send snapshot to device ${DEST}."
+					fi
+				else
+					if ! send_snapshot "${FILESYSTEM}" "${SNAP2}" "${DEST}"
+					then
+						echo "ERROR: Failed to send snapshot to device ${DEST}."
+					fi
+				fi
+			else
+				echo "ERROR: Failed to create a snapshot for ${FILESYSTEM}."
+			fi
+		done
+	fi
+fi

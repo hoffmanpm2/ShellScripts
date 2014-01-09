@@ -1,0 +1,18 @@
+#!/bin/bash
+rm -rf /home/philip/Media/Video/TV\ Shows/Comedy/MXC
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 01
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 02
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 03
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 04
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 05
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 06
+rm -rf /home/philip/Media/Video/TV\ Shows/Drama/Smallville/Season\ 07
+
+rm /home/philip/Media/Posters/MXC*.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 01.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 02.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 03.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 04.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 05.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 06.jpg
+rm /home/philip/Media/Posters/Smallville\ Season\ 07.jpg
